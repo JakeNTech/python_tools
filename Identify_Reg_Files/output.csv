@@ -1,0 +1,6 @@
+filename,size(KB),identified_type,full_area(Strings)
+./test_files/laptop.reg,2678.78,SAM,\SYSTEMROOT\SYSTEM32\CONFIG\SAM
+./test_files/on_my.reg,63692.8,SYSTEM,EMROOT\SYSTEM32\CONFIG\SOFTWARE
+./test_files/tester.reg,0.47,UNKNOWN,ETTSETTSETTSETTS
+./test_files/the_cat_is_trying.reg,13107.2,SYSTEM,SYSTEM
+./test_files/to_sit.reg,282677.25,UNKNOWN,DE-4A0C-422D-9079-1411D6B2044C}
