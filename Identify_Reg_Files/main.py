@@ -105,6 +105,11 @@ def process_headers(csv_name,file_list):
                 #print(this_header)90000004pppppppppp - The cat sat on the keybord here
                 #this_hex.pop(this_hex.index(nibble))
         this_header = "".join(this_header).upper()
+        # Issue with headers containing SYSTEM32 being detected as SYSTEM32...soloution: Remove SYSTEM32 and replace with SYS32
+        try:
+            this_header = this_header.replace("SYSTEM32","SYS32")
+        except:
+            pass
         # Files written to CSV as well as being added to the array to allow the header to be written to the CSV file too. 
         # The dictionary would end up being huge if it had the header in too with the CSV actions being completely separate. The header is gone once it's been written
         if "SAM" in this_header:
