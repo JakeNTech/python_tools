@@ -24,7 +24,7 @@ def create_CSV(csv_name):
     csv_file.close()
 def append_CSV(csv_name,file,identified_type,table_list):
     csv_file = open(csv_name,"a")
-    this_line = f"{file},{round(os.path.getsize(file)/1000,2)},{identified_type},{table_list}\n"
+    this_line = f"{file},{round(os.path.getsize(file)/1000,2)},{identified_type},{' '.join(table_list)}\n"
     csv_file.write(this_line)
     csv_file.close()
 
