@@ -1,3 +1,5 @@
 .DS_Store
 /Identify_Reg_Files/test_files/
+/Identify_sqlite/test_files/
 *.reg
+*.sqlite
