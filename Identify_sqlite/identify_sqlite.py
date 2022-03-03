@@ -1,7 +1,7 @@
 # Identify Registry files in a given Directory
 import os
 import argparse
-from subprocess import PIPE, Popen
+import subprocess
 import re
 from datetime import datetime
 
@@ -33,33 +33,33 @@ def file_copy(file_list,output_dir):
     if output_dir[-1] == "/":
         output_dir = output_dir[:-1]
     # Create Output Directory -> Account for already being created or other error messages (Such as Access denied) ->A bit agressive having to run the script again...something to change?
-    create = Popen(["mkdir",output_dir], stderr=PIPE).stderr.decode("utf8")
+    create = subprocess.run(["mkdir",output_dir], stderr=subprocess.PIPE).stderr.decode("utf8")
     if len(create) != 0:
          print(create,"\nExiting...")
          exit()
     # Time to move some files
     for file_type in file_list.keys():
         # Create Sub Output Directory within output directory
-        Popen(["mkdir",f"{output_dir}/{file_type}"])
+        subprocess.run(["mkdir",f"{output_dir}/{file_type}"])
         for file in file_list[file_type]:
             this_file_name = f"{output_dir}/{file_type}/{file.split('/')[-1]}"
-            Popen.run(["cp",f"{file}",this_file_name])
+            subprocess.run(["cp",f"{file}",this_file_name])
 def file_mover(file_list,output_dir):
     # Remove any "/" from the end of the destination path, makes dealing with an input that don't have it easier :)
     if output_dir[-1] == "/":
         output_dir = output_dir[:-1]
     # Create Output Directory -> Account for already being created or other error messages (Such as Access denied) ->A bit agressive having to run the script again...something to change?
-    create = Popen(["mkdir",output_dir], stderr=PIPE).stderr.decode("utf8")
+    create = subprocess.run(["mkdir",output_dir], stderr=subprocess.PIPE).stderr.decode("utf8")
     if len(create) != 0:
          print(create,"\nExiting...")
          exit()
     # Time to move some files
     for file_type in file_list.keys():
         # Create Sub Output Directory within output directory
-        Popen(["mkdir",f"{output_dir}/{file_type}"])
+        subprocess.run(["mkdir",f"{output_dir}/{file_type}"])
         for file in file_list[file_type]:
             this_file_name = f"{output_dir}/{file_type}/{file.split('/')[-1]}"
-            Popen.run(["mv",f"{file}",this_file_name])
+            subprocess.run(["mv",f"{file}",this_file_name])
 
 def process_files(file_list):
     # Convert file list to Dictionary 
@@ -70,34 +70,55 @@ def process_files(file_list):
         #this_file_strings = subprocess.run(["strings",file], stdout=subprocess.PIPE).stdout
         #this_head = subprocess.run(["head","-n","50"],stdin=this_file_strings,stdout=subprocess.PIPE).stdout.decode("ascii")
         # https://stackoverflow.com/questions/28154437/using-subprocess-to-get-output-of-grep-piped-through-head-1
-        p1 = Popen(["strings",file],stdout=PIPE)
-        p2 = Popen(["head", "-n","50"], stdin=p1.stdout, stdout=PIPE)
-        p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
-        out,err = output = p2.communicate()
-        out = out.decode("ascii").split("\n")
-        for line in out:
-            if "CREATE TABLE" in line:
+        # p1 = Popen(["strings",file],stdout=PIPE)
+        # p2 = Popen(["head", "-n","100"], stdin=p1.stdout, stdout=PIPE)
+        # p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
+        # out,err = output = p2.communicate()
+        # out = out.decode("ascii").split("\n")
+        strings = subprocess.run(["strings",file],stdout=subprocess.PIPE).stdout.decode("ascii").split("\n")
+        for line in strings:
+            if line[0:12] == "CREATE TABLE":
                 #this_tables.append(line)
-                this_table_name = re.search('CREATE TABLE ([^\s]\w*[^\s])', line).group(1)
+                try:
+                    this_table_name = re.search('CREATE TABLE ([^\s]\w*[^\s])', line).group(1)
+                except:
+                    this_table_name = ""
+
                 if this_table_name != "":
-                    files_tables[file].append(this_table_name.strip("|(|\""))
+                    files_tables[file].append(this_table_name.strip("|(|\"").upper())
     return files_tables
 
 # Identify file based on tables found
 def identify_file(csv_name,file_tables):
-    identify_files = {"Cookies":[],"History":[],"Unknown":[]}
+    identify_files = {"Cookies":[],"Chrome_History":[],"Autofill":[],"MacOS_Download_History":[],"itunesstored_private":[],"Mozilla_History":[],"Unknown":[]}
     for file in file_tables.keys():
-        if "cookies" in file_tables[file]:
+        if "COOKIES" in file_tables[file]:
             append_CSV(csv_name,file,"Cookies",file_tables[file])
-            # file_tables[file] = "Cookies"
             identify_files["Cookies"].append(file)
-        elif "visits" and "urls" in file_tables[file]:
-            append_CSV(csv_name,file,"History",file_tables[file])
-            # file_tables[file] = "History"
-            identify_files["History"].append(file)
+        
+        elif "VISITS" and "URLS" in file_tables[file]:
+            append_CSV(csv_name,file,"Chrome_History",file_tables[file])
+            identify_files["Chrome_History"].append(file)
+        
+        elif "AUTOFILL" and "CREDIT_CARDS" in file_tables[file]:
+            append_CSV(csv_name,file,"Autofill",file_tables[file])
+            identify_files["Autofill"].append(file)
+        
+        elif "LSQUARANTINEEVENT" in file_tables[file]:
+            append_CSV(csv_name,file,"MacOS_Download_History",file_tables[file])
+            identify_files["MacOS_Download_History"].append(file)
+        
+        elif "ZPUSHNOTIFICATIONENVIRONMENT" and "ZPUSHNOTIFICATION" in file_tables[file]:
+            append_CSV(csv_name,file,"itunesstored_private",file_tables[file])
+            identify_files["itunesstored_private"].append(file)
+         
+        elif "MOZ_PLACES" and "MOZ_HISTORYVISITS" in file_tables[file]:
+            append_CSV(csv_name,file,"Mozilla_History",file_tables[file])
+            identify_files["Mozilla_History"].append(file)
+        
         else:
-            #file_tables[file] = "Unknown"
             identify_files["Unknown"].append(file)
+            append_CSV(csv_name,file,"Unknown",file_tables[file])
     return identify_files
 
 if __name__ == "__main__":
@@ -110,6 +131,7 @@ if __name__ == "__main__":
     now = datetime.now()
     csv_name = f"{now.strftime('%d-%m-%YT%H%M.csv')}"
     create_CSV(csv_name)
+    print("Generating CSV...\n")
     file_tables = process_files(file_list)
     file_tables = identify_file(csv_name,file_tables)
     if args.move:

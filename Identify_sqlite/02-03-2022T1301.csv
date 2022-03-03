@@ -1,3 +1,0 @@
-filename,size(KB),identified_type,full_table_list
-./test_files/cookies.sqlite,956.42,Cookies,cookies meta
-./test_files/history_2.sqlite,212.99,History,downloads_slices segment_usage segments keyword_search_terms visit_source visits urls downloads_url_chains downloads meta
