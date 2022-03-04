@@ -90,35 +90,42 @@ def process_files(file_list):
 
 # Identify file based on tables found
 def identify_file(csv_name,file_tables):
-    identify_files = {"Cookies":[],"Chrome_History":[],"Autofill":[],"MacOS_Download_History":[],"itunesstored_private":[],"Mozilla_History":[],"Unknown":[]}
+    identify_files = {"Chromium_Cookies":[],"Chromium_History":[],"Chromium_Autofill":[],"MacOS_Download_History":[],"itunesstored_private":[],"Mozilla_History":[],"Safari_History":[],"Unknown":[]}
     for file in file_tables.keys():
+        # Chromium related SQLITE files
         if "COOKIES" in file_tables[file]:
-            append_CSV(csv_name,file,"Cookies",file_tables[file])
-            identify_files["Cookies"].append(file)
-        
+            append_CSV(csv_name,file,"Chromium_Cookies",file_tables[file])
+            identify_files["Chromium_Cookies"].append(file)
         elif "VISITS" and "URLS" in file_tables[file]:
-            append_CSV(csv_name,file,"Chrome_History",file_tables[file])
-            identify_files["Chrome_History"].append(file)
-        
+            append_CSV(csv_name,file,"Chromium_History",file_tables[file])
+            identify_files["Chromium_History"].append(file)
         elif "AUTOFILL" and "CREDIT_CARDS" in file_tables[file]:
-            append_CSV(csv_name,file,"Autofill",file_tables[file])
-            identify_files["Autofill"].append(file)
+            append_CSV(csv_name,file,"Chromium_Autofill",file_tables[file])
+            identify_files["Chromium_Autofill"].append(file)
         
+        # Mac OS X related SQLite files
         elif "LSQUARANTINEEVENT" in file_tables[file]:
             append_CSV(csv_name,file,"MacOS_Download_History",file_tables[file])
             identify_files["MacOS_Download_History"].append(file)
-        
         elif "ZPUSHNOTIFICATIONENVIRONMENT" and "ZPUSHNOTIFICATION" in file_tables[file]:
             append_CSV(csv_name,file,"itunesstored_private",file_tables[file])
             identify_files["itunesstored_private"].append(file)
-         
+        
+        # Apple Safari related SQLite files
+        elif "HISTORY_VISITS" and "HISTORY_ITEMS" in file_tables[file]:
+            append_CSV(csv_name,file,"Safari_History",file_tables[file])
+            identify_files["Safari_History"].append(file)
+        
+        # Mozilla Firefox related SQLite files
         elif "MOZ_PLACES" and "MOZ_HISTORYVISITS" in file_tables[file]:
             append_CSV(csv_name,file,"Mozilla_History",file_tables[file])
             identify_files["Mozilla_History"].append(file)
         
+        # Everything I don't know what they are ;)        
         else:
             identify_files["Unknown"].append(file)
             append_CSV(csv_name,file,"Unknown",file_tables[file])
+        
     return identify_files
 
 if __name__ == "__main__":

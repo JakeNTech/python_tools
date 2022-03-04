@@ -167,9 +167,10 @@ if __name__ == "__main__":
     #identified_files = {"SAM":["test.1","test.2"],"SECURITY":["test.3"],"SYSTEM":[],"SOFTWARE":["test.4"],"NTUSER":["test5.reg::Keith"],"UsrClass":[],"Amcache":[],"UNKNOWN":[]}
     if args.move:
         file_mover(identified_files,args.move)
-        print("Files moved into directory structure! CSV Generated!\n\nExiting..")
+        print("Files moved into directory structure! CSV Generated!")
     elif args.copy:
         file_mover(identified_files,args.copy)
-        print("Files copied into directory structure! CSV Generated!\n\nExiting..")
+        print("Files copied into directory structure! CSV Generated!")
     else:
-        print("CSV file Generated!\n\nExiting...")
+        print("CSV file Generated!")
+    print(f"\nQuickstats:\nSAM: {len(identified_files['SAM'])}, SECURITY: {len(identified_files['SECURITY'])}, SYSTEM: {len(identified_files['SYSTEM'])}, SOFTWARE: {len(identified_files['SOFTWARE'])}, NTUSER: {len(identified_files['NTUSER'])}, USERCLASS.DAT: {len(identified_files['UsrClass'])}, AMCACHE: {len(identified_files['Amcache'])}, Unidentified: {len(identified_files['UNKNOWN'])}\n\nExiting...")
