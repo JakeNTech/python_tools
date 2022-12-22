@@ -3,3 +3,5 @@
 /Identify_sqlite/test_files/
 *.reg
 *.sqlite
+*.txt
+*.csv
